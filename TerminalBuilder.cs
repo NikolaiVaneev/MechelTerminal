@@ -35,13 +35,29 @@ namespace MechelTerminal
             terminal.Services.Add(service);
         }
         /// <summary>
+        /// Добавить коллекцию услуг
+        /// </summary>
+        /// <param name="services"></param>
+        public void AddServiceRange(ICollection<IService> services)
+        {
+            foreach (IService service in services)
+            {
+                AddService(service);
+            }
+        }
+
+        /// <summary>
         /// Запустить терминал
         /// </summary>
+        /// <param name="showInfo">Показать информацию</param>
         /// <returns></returns>
-        public Terminal Build()
+        public Terminal Build(bool showInfo = true)
         {
-            ShowHeader();
-            ShowServices();
+            if (showInfo)
+            {
+                ShowHeader();
+                ShowServices();
+            }
             return terminal;
         }
 

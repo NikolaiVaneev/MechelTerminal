@@ -27,13 +27,18 @@ namespace MechelTerminal
             tb.AddService(new Service(2, "Оформление заказа", 7));
             tb.AddService(new Service(3, "Оформление возврата", 10));
             tb.AddService(new Service(4, "Консультация", 15));
-            Terminal = tb.Build();
+            Terminal = tb.Build(false);
 
             if (Terminal.Services.Count > 0)
             {
                 while (true)
                 {
-                    Work();
+                    if (!GenerateRandomServiceRequest())
+                    {
+                        PrintReport();
+                        break;
+                    }
+                    //Work();
                 }
             }
             Console.ReadKey();
@@ -87,6 +92,39 @@ namespace MechelTerminal
             {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("Введено некорректное значение! Попробуйте снова");
+            }
+        }
+
+        /// <summary>
+        /// Создать случайную заявку на услугу
+        /// </summary>
+        /// <returns></returns>
+        private static bool GenerateRandomServiceRequest()
+        {
+            int selectedServiceIndex = RandomValue.Generate(Terminal.Services.Count);
+            var selectedService = Terminal.Services[selectedServiceIndex];
+
+            // Получаем менее загруженного оператора
+            var leastLoadedEmployee = Employees.OrderBy(t => t.CurrentServices.Sum(s => s.Time)).First();
+            if (480 - leastLoadedEmployee.CurrentServices.Sum(s => s.Time) < selectedService.Time)
+            {
+                return false;
+            }
+
+            leastLoadedEmployee.CurrentServices.Add(selectedService);
+            //Console.WriteLine($"Окно №{leastLoadedEmployee.Number} {selectedService.Description} ({selectedService.Time} мин.)");
+            return true;
+        }
+    
+        private static void PrintReport()
+        {
+            foreach (var employee in Employees)
+            {
+                Console.WriteLine($"{Environment.NewLine}Окно №{employee.Number}. Оказано услуг: {employee.CurrentServices.Count}");
+                for (int i = 0; i < employee.CurrentServices.Count; i++)
+                {
+                    Console.WriteLine($"{{{{{employee.CurrentServices[i].Description} ({employee.CurrentServices[i].Time} мин.)}}}}{{{{{i + 1}}}}}");
+                }
             }
         }
     }
